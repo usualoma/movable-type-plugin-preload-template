@@ -1,0 +1,25 @@
+#plugin information
+id: PreloadTemplate
+name: PreloadTemplate
+version: 0.1.0
+
+#about this plugin
+description: <__trans phrase="Evaluating the template before publishing pages.">
+author_name: <__trans phrase="toi-planning">
+author_link: http://tec.toi-planning.net/
+plugin_link: http://tec.toi-planning.net/mt/preloadtemplate/
+doc_link: http://tec.toi-planning.net/mt/preloadtemplate/manual
+
+#Localization
+l10n_class: PreloadTemplate::L10N
+
+tags:
+    block:
+        DefineTag: $PreloadTemplate::PreloadTemplate::_hdlr_define_tag
+
+callbacks:
+    MT::App::CMS::pre_run: $PreloadTemplate::PreloadTemplate::pre_run
+    MT::App::CMS::template_param.list_template: $PreloadTemplate::PreloadTemplate::param_list_template
+    MT::App::CMS::template_param.template_table: $PreloadTemplate::PreloadTemplate::param_template_table
+    MT::App::CMS::template_param.edit_template: $PreloadTemplate::PreloadTemplate::param_edit_template
+    MT::Template::post_load: $PreloadTemplate::PreloadTemplate::post_load_template
