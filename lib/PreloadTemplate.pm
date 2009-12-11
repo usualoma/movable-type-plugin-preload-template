@@ -23,33 +23,53 @@
 package PreloadTemplate;
 use strict;
 
-sub init_pre_run {
+sub pre_run {
 	my ($cb, $app) = @_;
 
-	&_preload;
+	&_preload($app->blog);
 }
 
 sub _preload {
 	my $app = MT->instance;
+	my ($blog) = @_;
+	my $key = 'preloaded_params:' . ($blog ? $blog->id : 0);
 
-	return 1 if $app->request('preloaded_params');
+	my @blog_ids = (0);
+	if ($blog) {
+		push(@blog_ids, $blog->id);
+		if (my $website = $blog->website) {
+			push(@blog_ids, $website->id);
+		}
+	}
+
+	return 1 if $app->request($key);
 
 	require MT::Template;
-	my @tmpls = MT::Template->load({
-		'blog_id' => ($app->blog ? [0, $app->blog->id] : 0),
-		'type' => 'preload',
-	});
+	my @tmpls = MT::Template->load(
+		{
+			'blog_id' => \@blog_ids,
+			'type' => 'preload',
+		},
+		{
+			sort => [
+				{ column => 'blog_id', desc => 'ASC' },
+				{ column => 'name', desc => 'ASC' },
+			],
+		},
+	);
+
 	my $all_param = {};
 	foreach my $tmpl (@tmpls) {
 		next unless $tmpl;
-		MT->log($tmpl->output);
+		$tmpl->output;
 		my $param = $tmpl->param;
+		last if $tmpl->context->stash('preload_template_stop_propagation');
 		foreach my $k (keys(%$param)) {
 			$all_param->{$k} = $param->{$k};
 		}
 	}
 
-	$app->request('preloaded_params', $all_param);
+	$app->request($key, $all_param);
 
 	require MT::Template;
 	no warnings 'redefine';
@@ -60,7 +80,7 @@ sub _preload {
 		my $ctx = shift || $tmpl->context;
 
 		if ($tmpl->id) {
-			my $param = $app->request('preloaded_params');
+			my $param = $app->request($key);
 			foreach my $k (%$param) {
 				$ctx->{__stash}{vars}{$k} = $param->{$k};
 			}
@@ -70,11 +90,18 @@ sub _preload {
 	};
 }
 
+sub _preload_param {
+	my $app = MT->instance;
+	my ($blog) = @_;
+
+	$app->request('preloaded_params:' . ($blog ? $blog->id : 0)) || {};
+}
+
 sub post_load_template {
 	my ($cb, $obj) = @_;
 	my $app = MT->instance;
 
-	&_preload;
+	&_preload($obj->blog);
 
 	if (
 		$app->can('mode')
@@ -84,7 +111,7 @@ sub post_load_template {
 		$obj->type('custom');
 	}
 
-	$obj->param($app->request('preloaded_params'));
+	$obj->param(&_preload_param($obj->blog));
 }
 
 sub param_list_template {
