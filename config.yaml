@@ -13,6 +13,11 @@ doc_link: http://tec.toi-planning.net/mt/preloadtemplate/manual
 #Localization
 l10n_class: PreloadTemplate::L10N
 
+applications:
+    cms:
+        methods:
+            preload_template_tags_help: $PreloadTemplate::PreloadTemplate::tags_help
+
 tags:
     function:
         PreloadTemplateStopPropagation: $PreloadTemplate::PreloadTemplate::_hdlr_stop_propagation
