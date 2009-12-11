@@ -14,6 +14,8 @@ doc_link: http://tec.toi-planning.net/mt/preloadtemplate/manual
 l10n_class: PreloadTemplate::L10N
 
 tags:
+    function:
+        PreloadTemplateStopPropagation: $PreloadTemplate::PreloadTemplate::_hdlr_stop_propagation
     block:
         DefineTag: $PreloadTemplate::PreloadTemplate::_hdlr_define_tag
 

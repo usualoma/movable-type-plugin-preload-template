@@ -226,4 +226,12 @@ sub _hdlr_define_tag {
 	};
 }
 
+sub _hdlr_stop_propagation {
+	my ($ctx, $args) = @_;
+
+	$ctx->stash('preload_template_stop_propagation', 1);
+
+	'';
+}
+
 1;
