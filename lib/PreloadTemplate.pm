@@ -26,7 +26,9 @@ use strict;
 sub pre_run {
 	my ($cb, $app) = @_;
 
-	&_preload($app->blog);
+	if ($app->mode ne 'preload_template_tags_help') {
+		&_preload($app->blog);
+	}
 }
 
 sub _preload {
@@ -61,12 +63,19 @@ sub _preload {
 	my $all_param = {};
 	foreach my $tmpl (@tmpls) {
 		next unless $tmpl;
-		$tmpl->output;
-		my $param = $tmpl->param;
-		last if $tmpl->context->stash('preload_template_stop_propagation');
+
+		my $key = 'preloaded_tmpl_params:' . $tmpl->id;
+		my $param = $app->request($key);
+		if (! $param) {
+			$tmpl->output;
+			$param = $tmpl->param;
+			$app->request($key, $param);
+		}
+
 		foreach my $k (keys(%$param)) {
 			$all_param->{$k} = $param->{$k};
 		}
+		last if $tmpl->context->stash('preload_template_stop_propagation');
 	}
 
 	$app->request($key, $all_param);
@@ -247,11 +256,21 @@ sub _hdlr_stop_propagation {
 
 sub tags_help {
     my $app = shift;
+	my $plugin = MT->component('PreloadTemplate');
+	my $tags = $plugin->registry('tags');
+	my $help_url = $tags->{'help_url'};
+
 	my $tmpl = MT->model('template')->load($app->param('template_id'));
 	$tmpl->output;
 	my $helps = $tmpl->context->stash('preload_template_helps');
 
-	return $helps->{$app->param('tag')};
+	if ($helps->{$app->param('tag')}) {
+		return $helps->{$app->param('tag')};
+	}
+	else {
+		$help_url =~ s/%t/$app->param('tag')/ge;
+		MT->instance->redirect($help_url);
+	}
 }
 
 1;
