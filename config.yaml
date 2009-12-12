@@ -1,7 +1,7 @@
 #plugin information
 id: PreloadTemplate
 name: PreloadTemplate
-version: 0.2.2
+version: 0.2.3
 
 #about this plugin
 description: <__trans phrase="Evaluating the template before publishing pages.">
