@@ -9,7 +9,7 @@ use vars qw( %Lexicon );
 	'Create preload template' => 'プレロードテンプレートの作成',
 	'Preload Templates' => 'プレロードテンプレート',
 	'Preload' => 'プレロード',
-	'Evaluating the template before publishing pages.' => 'ページを出力する前に指定したテンプレートを評価します。
+	'Evaluating the template before publishing pages.' => 'ページを出力する前に指定したテンプレートを評価します。',
 );
 
 1;
